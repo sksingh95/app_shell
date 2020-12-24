@@ -58,10 +58,10 @@ static cmd_ret_t exit_cmd(char **cmd_arg_ptr);
 static cmd_ret_t mod_list_cmd(char **cmd_arg_ptr);
 
 cmd_t cmd_table[] = {
-		{"help",              help_cmd,       "Show list of available commands."},
-		{"version",           version_cmd,    "Version of shell."},
-		{"exit",              exit_cmd,       "Terminate sh."},
-		{"modList",           mod_list_cmd,   "List of module registered with shell."}
+		{"help",              help_cmd,       "Show list of available commands.",      "help [cmdName]"},
+		{"version",           version_cmd,    "Version of shell.",                     "version"},
+		{"exit",              exit_cmd,       "Terminate shell.",                      "exit"},
+		{"modList",           mod_list_cmd,   "List of module registered with shell.", "modList"}
 };
 
 void shell_setup(){
@@ -201,6 +201,7 @@ cmd_ret_t execute_cmd() {
 	
 	strcat(cmd_name, "Running... ");
 	for(i=0; *(cmd_arg_ptr+i) != NULL; i++) {
+		strcat(cmd_name, " ");
 		strcat(cmd_name, *(cmd_arg_ptr+i));
 	}
 	strcat(cmd_name, "\n");
@@ -221,6 +222,19 @@ cmd_ret_t search_cmd_in_list(char *cmd, cmd_cb_fptr *cmd_cb) {
 		}
 	}
 	return CMD_NOT_FOUND_E;
+}
+
+cmd_t* get_cmd_from_list(char *cmd) {
+	int i = 0;
+	cmd_list_node_t *temp;
+	LIST_ITERATOR(ptrCmdTableListHead, temp) {
+		for(i=0; i < (temp->cmd_list_size); i++) {
+			if(strcasecmp(cmd, temp->cmd_list[i].cmd_name) == 0) {	
+				return &temp->cmd_list[i];				    /* return reference to command if found */
+			}
+		}
+	}
+	return NULL;
 }
 
 int register_module_cmd_tbl(char * module_name, cmd_t cmd_list[], int cmd_list_size) {
@@ -265,15 +279,28 @@ static cmd_ret_t mod_list_cmd(char **cmd_arg_ptr){
 	return CMD_RUN_SUCCESS_E;
 }
 
+// get_str_param()
+// get_int_param()
+// get_float_param()
+
 static cmd_ret_t help_cmd(char **cmd_arg_ptr){
 	cmd_list_node_t *temp;
 	int i=0;
+	char ** rcvd_cmd = cmd_arg_ptr + 1;//? (cmd_arg_ptr + 1) : cmd_arg_ptr;
+	
+	if(*rcvd_cmd == NULL){
 	LIST_ITERATOR(ptrCmdTableListHead, temp){
 		print_shell_resp("---%s---\n", temp->mod_name);
 			for(i=0;  i < (temp->cmd_list_size); i++){
-				print_shell_resp("%s\n", temp->cmd_list[i].cmd_name);
+				print_shell_resp("%-15s :%s\n", temp->cmd_list[i].cmd_name, temp->cmd_list[i].short_desc);
 			}
 			print_shell_resp("\n");
+	}
+	}
+	else {
+		cmd_t* cmd = get_cmd_from_list(*rcvd_cmd);
+		print_shell_resp("%s : %s\n", cmd->cmd_name, cmd->short_desc);
+		print_shell_resp("Syntax : %s\n", cmd->syntax);
 	}
 	return CMD_RUN_SUCCESS_E;
 }

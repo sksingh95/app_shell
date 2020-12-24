@@ -39,6 +39,7 @@ typedef struct {
 	char         cmd_name[CMD_LENGTH_IN_BYTE];    /* Name of command */
 	cmd_cb_fptr  cmd_cb;                          /* Function that run when command is triggered. */
 	char *       short_desc;                      /* Short description of command. */
+	char *       syntax;                          /* Syntax for the command. */
 }cmd_t;
 
 typedef struct cmd_list_node {
