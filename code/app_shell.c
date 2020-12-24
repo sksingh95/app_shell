@@ -201,6 +201,7 @@ cmd_ret_t execute_cmd() {
 	
 	strcat(cmd_name, "Running... ");
 	for(i=0; *(cmd_arg_ptr+i) != NULL; i++) {
+		strcat(cmd_name, " ");
 		strcat(cmd_name, *(cmd_arg_ptr+i));
 	}
 	strcat(cmd_name, "\n");
